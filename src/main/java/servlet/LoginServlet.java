@@ -1,6 +1,5 @@
 package servlet;
 
-import dao.DaoFactory;
 import dao.UserDao;
 import model.User;
 
@@ -15,16 +14,16 @@ import javax.servlet.http.HttpSession;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
+    private UserDao userDao;
 
-    
     @Override
     public void init() {
-
+        userDao = new UserDao();
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.sendRedirect(req.getContextPath()+"/login.jsp");
+        resp.sendRedirect(req.getContextPath() + "/login.jsp");
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -32,17 +31,17 @@ public class LoginServlet extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         HttpSession session = request.getSession();
-       Optional<User> dbUser = DaoFactory.getUserDao().findBy("username",username);;
+        Optional<User> dbUser = userDao.findBy("username", username);
         if (dbUser.isPresent()) {
-            if(dbUser.get().getPassword().equals(password)) {
+            if (dbUser.get().getPassword().equals(password)) {
                 session.setAttribute("isAuthenticated", true);
                 session.setAttribute("role", dbUser.get().getRole());
                 response.sendRedirect(request.getContextPath() + "/list");
             }
         } else {
-        	
+
             request.setAttribute("error", "Invalid credentials");
-            session.setAttribute("isAuthenticated",false);
+            session.setAttribute("isAuthenticated", false);
             request.getRequestDispatcher("/login.jsp").forward(request, response);
         }
     }

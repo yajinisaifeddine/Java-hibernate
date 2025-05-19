@@ -10,23 +10,28 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import dao.DaoFactory;
+import dao.UserDao;
 import model.User;
 
  @WebServlet("/register")
 public class RegisterServlet  extends HttpServlet{
+private UserDao userDao;
 
-	
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+     @Override
+     public void init() throws ServletException {
+         userDao = new UserDao();
+     }
+
+     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         User user=  new User(username,password);
-		if(DaoFactory.getUserDao().findBy("username",username).isPresent()){
+		if(userDao.findBy("username",username).isPresent()){
 			response.sendRedirect(request.getContextPath() + "/signup.jsp?error=failed");
 			return;
 		}
-        Optional<User> dbUser = DaoFactory.getUserDao().save(user);
+        Optional<User> dbUser = userDao.save(user);
         System.out.println(dbUser.get());
         if(dbUser.isPresent()) {
         	HttpSession session = request.getSession();

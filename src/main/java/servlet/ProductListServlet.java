@@ -1,4 +1,6 @@
 package servlet;
+import dao.ProductDao;
+
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -8,12 +10,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import dao.DaoFactory;
-import dao.ProductDao;
-
 @WebServlet("/list")
 public class ProductListServlet extends HttpServlet {
 
+
+    private ProductDao productDao;
+    @Override
+    public void init() throws ServletException {
+
+        super.init();
+        productDao = new ProductDao();
+    }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -31,7 +38,7 @@ public class ProductListServlet extends HttpServlet {
         HttpSession session = req.getSession(false);
         
         // Fetch all products and forward to the view
-        request.setAttribute("products", DaoFactory.getProductDao().findAll());
+        request.setAttribute("products", productDao.findAll());
         request.setAttribute("role",session.getAttribute("role"));
         
         boolean isLoggedIn = ((session.getAttribute("isAuthenticated") !=null && (boolean) session.getAttribute("isAuthenticated"))) ;

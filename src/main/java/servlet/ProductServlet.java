@@ -1,5 +1,5 @@
 package servlet;
-import dao.DaoFactory;
+import dao.ProductDao;
 import model.Product;
 import utils.Authentication;
 
@@ -16,6 +16,12 @@ import javax.servlet.http.HttpServletResponse;
 
 @WebServlet("/products")
 public class ProductServlet extends HttpServlet {
+private ProductDao productDao ;
+
+    @Override
+    public void init() throws ServletException {
+        productDao = new ProductDao();
+    }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -78,7 +84,7 @@ public class ProductServlet extends HttpServlet {
 
     private void listProducts(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setAttribute("products", DaoFactory.getProductDao().findAll());
+        request.setAttribute("products", productDao.findAll());
         request.getRequestDispatcher("/WEB-INF/views/list-products.jsp").forward(request, response);
     }
 
@@ -92,7 +98,7 @@ public class ProductServlet extends HttpServlet {
         Long id = Long.parseLong(request.getParameter("id"));
 
 
-        Optional<Product> optionalProduct = DaoFactory.getProductDao().findById(id);
+        Optional<Product> optionalProduct = productDao.findById(id);
         if (optionalProduct.isEmpty())return;
 
         request.setAttribute("product", optionalProduct.get());
@@ -105,7 +111,7 @@ public class ProductServlet extends HttpServlet {
         String description = request.getParameter("description");
         double price = Double.parseDouble(request.getParameter("price"));
         Product newProduct = new Product(name, description, price);
-        DaoFactory.getProductDao().save(newProduct);
+        productDao.save(newProduct);
         response.sendRedirect("products");
     }
 
@@ -118,14 +124,14 @@ public class ProductServlet extends HttpServlet {
 
         Product product = new Product(name, description, price);
         product.setId(id);
-        DaoFactory.getProductDao().update(product);
+        productDao.update(product);
         response.sendRedirect("products");
     }
 
     private void deleteProduct(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         Long id = Long.parseLong(request.getParameter("id"));
-        DaoFactory.getProductDao().delete(id);
+        productDao.delete(id);
         response.sendRedirect("products");
     }
 }
